@@ -1,0 +1,1494 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitMaster Pro | Advanced Fitness Coaching</title>
+    <meta name="description" content="Transform your body in 120 days with AI-powered fitness coaching and 3D exercise guidance">
+    <meta name="author" content="FitMaster Pro">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary: #5e36b5;
+            --secondary: #76739f;
+            --accent: #4cc9f0;
+            --success: #4ade80;
+            --warning: #facc15;
+            --danger: #f87171;
+            --dark: #1e1e2d;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --card-bg: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        header {
+            background: rgba(30, 30, 45, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .logo i {
+            color: var(--success);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+        
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+        }
+        
+        nav a:hover {
+            background: rgba(67, 97, 238, 0.2);
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 201, 240, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 201, 240, 0.6);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: rgba(30, 30, 45, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal h2 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--light);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .checkbox-group {
+            margin: 1rem 0;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        
+        /* Auth Only Elements */
+        .auth-only {
+            display: none;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
+        }
+        
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.8rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            border-radius: 2px;
+        }
+        
+        .section-title p {
+            color: var(--light);
+            max-width: 700px;
+            margin: 1.5rem auto 0;
+            font-size: 1.2rem;
+            opacity: 0.85;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 15px 40px rgba(76, 201, 240, 0.3);
+            border-color: rgba(76, 201, 240, 0.3);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+        }
+        
+        .feature-content {
+            padding: 2rem;
+        }
+        
+        .feature-content h3 {
+            font-size: 1.7rem;
+            margin-bottom: 1.2rem;
+            color: var(--accent);
+        }
+        
+        .feature-content p {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+        
+        /* Workout Demo Section */
+        .workout-demo {
+            padding: 6rem 2rem;
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+        }
+        
+        .demo-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .demo-content {
+            flex: 1;
+        }
+        
+        .demo-content h2 {
+            font-size: 2.8rem;
+            color: var(--accent);
+            margin-bottom: 1.8rem;
+            line-height: 1.3;
+        }
+        
+        .demo-content p {
+            margin-bottom: 1.8rem;
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            line-height: 1.8;
+        }
+        
+        .demo-features {
+            margin-top: 2rem;
+        }
+        
+        .demo-feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+        }
+        
+        .demo-feature i {
+            color: var(--success);
+            font-size: 1.5rem;
+            margin-right: 15px;
+            width: 30px;
+        }
+        
+        .animation-container {
+            flex: 1;
+            height: 550px;
+            background: rgba(30, 30, 45, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(76, 201, 240, 0.2);
+        }
+        
+        #exercise-animation {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .animation-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 10;
+        }
+        
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .control-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .exercise-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(30, 30, 45, 0.8);
+            padding: 1.2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(76, 201, 240, 0.3);
+        }
+        
+        .exercise-info h3 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .exercise-category {
+            color: var(--success);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .exercise-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-box {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .timer-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 30, 45, 0.8);
+            padding: 1.2rem 1.8rem;
+            border-radius: 15px;
+            border: 1px solid rgba(76, 201, 240, 0.3);
+            text-align: center;
+        }
+        
+        .timer-container .label {
+            color: #94a3b8;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .timer {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            font-family: monospace;
+        }
+        
+        /* Exercise Selection */
+        .exercise-selection {
+            background: #0f172a;
+            padding: 4rem 2rem;
+        }
+        
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 3rem auto 0;
+        }
+        
+        .exercise-card {
+            background: rgba(30, 30, 45, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+        
+        .exercise-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+        }
+        
+        .exercise-card.active {
+            border-color: var(--success);
+            box-shadow: 0 10px 25px rgba(74, 222, 128, 0.3);
+        }
+        
+        .exercise-img {
+            height: 180px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+        }
+        
+        .exercise-content {
+            padding: 1.5rem;
+        }
+        
+        .exercise-content h4 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+        
+        .exercise-content .category {
+            color: var(--success);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .difficulty {
+            display: flex;
+            gap: 5px;
+            margin-top: 1rem;
+        }
+        
+        .difficulty i {
+            color: #94a3b8;
+        }
+        
+        .difficulty i.active {
+            color: var(--warning);
+        }
+        
+        /* Workout Plan Section */
+        .workout-plan {
+            padding: 4rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        #workout-plan {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(30, 30, 45, 0.7);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        #day-counter {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            text-align: center;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 1rem 0;
+            height: 20px;
+        }
+        
+        #workout-progress {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        /* Progress Section */
+        .progress-section {
+            padding: 4rem 2rem;
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+        }
+        
+        #progress-photos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .progress-photo {
+            background: rgba(30, 30, 45, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-photo img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .photo-info {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* Pricing Section */
+        .pricing {
+            padding: 6rem 2rem;
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            max-width: 1300px;
+            margin: 4rem auto 0;
+        }
+        
+        .pricing-card {
+            background: rgba(30, 30, 45, 0.7);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-15px);
+            border-color: var(--accent);
+        }
+        
+        .pricing-card.popular {
+            border-color: var(--success);
+            box-shadow: 0 20px 50px rgba(74, 222, 128, 0.3);
+        }
+        
+        .popular-tag {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: var(--dark);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+        }
+        
+        .pricing-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        .pricing-header h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .price {
+            font-size: 3.8rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+        
+        .price span {
+            font-size: 1.3rem;
+            font-weight: 400;
+        }
+        
+        .pricing-features {
+            padding: 2.5rem 2rem;
+        }
+        
+        .pricing-features ul {
+            list-style: none;
+        }
+        
+        .pricing-features li {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .pricing-features li i {
+            color: var(--success);
+            font-size: 1.2rem;
+        }
+        
+        .pricing-features li.disabled i {
+            color: var(--danger);
+        }
+        
+        .pricing-footer {
+            padding: 0 2rem 2.5rem;
+            text-align: center;
+        }
+        
+        /* Workout Container */
+        #workout-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 1000;
+            padding: 2rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            padding: 4rem 2rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        
+        .footer-col h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.8rem;
+            color: var(--accent);
+            position: relative;
+            padding-bottom: 0.8rem;
+        }
+        
+        .footer-col h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent);
+        }
+        
+        .footer-col p {
+            margin-bottom: 1.5rem;
+            color: #94a3b8;
+            line-height: 1.8;
+        }
+        
+        .footer-col ul {
+            list-style: none;
+        }
+        
+        .footer-col ul li {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-col ul li a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .footer-col ul li a:hover {
+            color: var(--accent);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1.2rem;
+            margin-top: 1.8rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            color: var(--accent);
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+        
+        .social-links a:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 3rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: #64748b;
+            max-width: 1300px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .demo-container {
+                flex-direction: column;
+            }
+            
+            .animation-container {
+                width: 100%;
+                max-width: 700px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1.2rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-dumbbell"></i>
+            <span>FITMASTER PRO</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" class="nav-link" data-section="home">Home</a></li>
+                <li><a href="#" class="nav-link" data-section="workouts">Workouts</a></li>
+                <li><a href="#" class="nav-link" data-section="progress">Progress</a></li>
+                <li><a href="#" class="nav-link" data-section="nutrition">Nutrition</a></li>
+                <li><a href="#" class="nav-link" data-section="plans">Plans</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button id="login-btn" class="btn btn-outline unauth-only">Login</button>
+            <button id="signup-btn" class="btn btn-primary unauth-only">Start Free Trial</button>
+            <span id="user-name" class="auth-only" style="margin-right: 1rem;"></span>
+            <button id="logout-btn" class="btn btn-outline auth-only">Logout</button>
+        </div>
+    </header>
+
+    <!-- Auth Modals -->
+    <div id="login-modal" class="modal unauth-only">
+        <div class="modal-content">
+            <h2>Login to Your Account</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;">Login</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;">Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
+        </div>
+    </div>
+
+    <div id="signup-modal" class="modal unauth-only">
+        <div class="modal-content">
+            <h2>Create Your Account</h2>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;">Start Free Trial</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem;">Already have an account? <a href="#" id="show-login">Login</a></p>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <h2>Complete Your Profile</h2>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label for="profile-gender">Gender</label>
+                    <select id="profile-gender" required>
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="profile-age">Age</label>
+                    <input type="number" id="profile-age" min="13" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile-weight">Weight (kg)</label>
+                    <input type="number" id="profile-weight" min="30" max="200" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile-height">Height (cm)</label>
+                    <input type="number" id="profile-height" min="100" max="250" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile-bodyfat">Body Fat Percentage</label>
+                    <input type="number" id="profile-bodyfat" min="5" max="50" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="profile-fitness-level">Fitness Level</label>
+                    <select id="profile-fitness-level" required>
+                        <option value="">Select</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Equipment Available</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="equipment" value="dumbbells"> Dumbbells</label>
+                        <label><input type="checkbox" name="equipment" value="barbell"> Barbell</label>
+                        <label><input type="checkbox" name="equipment" value="pullup-bar"> Pull-up Bar</label>
+                        <label><input type="checkbox" name="equipment" value="resistance-bands"> Resistance Bands</label>
+                        <label><input type="checkbox" name="equipment" value="none"> No Equipment</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Any Injuries or Limitations?</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="injuries" value="back"> Back Problems</label>
+                        <label><input type="checkbox" name="injuries" value="knee"> Knee Problems</label>
+                        <label><input type="checkbox" name="injuries" value="shoulder"> Shoulder Problems</label>
+                        <label><input type="checkbox" name="injuries" value="wrist"> Wrist Problems</label>
+                        <label><input type="checkbox" name="injuries" value="none"> None</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profile-diet">Dietary Preference</label>
+                    <select id="profile-diet" required>
+                        <option value="">Select</option>
+                        <option value="omnivore">Omnivore</option>
+                        <option value="vegetarian">Vegetarian</option>
+                        <option value="vegan">Vegan</option>
+                        <option value="pescatarian">Pescatarian</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="profile-activity">Activity Level</label>
+                    <select id="profile-activity" required>
+                        <option value="">Select</option>
+                        <option value="sedentary">Sedentary (little or no exercise)</option>
+                        <option value="lightly-active">Lightly Active (light exercise 1-3 days/week)</option>
+                        <option value="moderately-active">Moderately Active (moderate exercise 3-5 days/week)</option>
+                        <option value="very-active">Very Active (hard exercise 6-7 days/week)</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;">Save Profile & Generate Plan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content Sections -->
+    <section id="home-section">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>TRANSFORM YOUR BODY IN 120 DAYS</h1>
+                <p>AI-powered personalized fitness plans with real-time 3D exercise guidance. Track your progress, burn calories, and achieve your dream physique.</p>
+                <div class="cta-buttons">
+                    <button id="hero-signup-btn" class="btn btn-primary" style="margin-right: 15px; padding: 1rem 2.2rem;">
+                        <i class="fas fa-play-circle"></i> Start Free Trial
+                    </button>
+                    <button class="btn btn-outline" style="padding: 1rem 2.2rem;">
+                        <i class="fas fa-video"></i> View Demo
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="section-title">
+                <h2>Why Choose FitMaster Pro?</h2>
+                <p>Advanced features designed to give you the best fitness transformation experience</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Personalized Plans</h3>
+                        <p>120-day customized workout plans based on your body metrics, goals, equipment, and dietary preferences.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>3D Exercise Guidance</h3>
+                        <p>Real-time animated demonstrations showing proper form for every exercise in your routine.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Progress Tracking</h3>
+                        <p>Track workouts, body measurements, and progress photos to visualize your transformation.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-fire-alt"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Calorie Tracker</h3>
+                        <p>Monitor calories burned during workouts and throughout the day with our advanced algorithm.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Smart Reminders</h3>
+                        <p>Never miss a workout with personalized notifications and rest day scheduling.</p>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Progress Photos</h3>
+                        <p>Track your transformation with Day 1 to Day 120 photo comparisons in your private gallery.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workout Demo Section -->
+        <section class="workout-demo">
+            <div class="section-title">
+                <h2>Interactive 3D Workout Guidance</h2>
+                <p>Real-time animated demonstrations for perfect form on every exercise</p>
+            </div>
+            <div class="demo-container">
+                <div class="demo-content">
+                    <h2>Experience Precision Exercise Guidance</h2>
+                    <p>Our advanced 3D animation system provides real-time exercise demonstrations that match exactly what you need to do. The animated model performs the precise movement required for each exercise, with proper form and technique.</p>
+                    <p>Whether you're doing pushups, squats, or specialized exercises, our system shows you exactly how to perform each movement safely and effectively.</p>
+                    
+                    <div class="demo-features">
+                        <div class="demo-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Gender-specific models (male/female)</span>
+                        </div>
+                        <div class="demo-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>100+ exercises with accurate animations</span>
+                        </div>
+                        <div class="demo-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Real-time timer and rep counter</span>
+                        </div>
+                        <div class="demo-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Form correction indicators</span>
+                        </div>
+                        <div class="demo-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Adjustable difficulty levels</span>
+                        </div>
+                    </div>
+                    
+                    <button id="demo-start-btn" class="btn btn-primary" style="margin-top: 1.5rem; padding: 1rem 2.2rem;">
+                        <i class="fas fa-play"></i> Start Your Workout
+                    </button>
+                </div>
+                <div class="animation-container">
+                    <div id="exercise-animation">
+                        <!-- 3D animation will be rendered here -->
+                    </div>
+                    <div class="exercise-info">
+                        <h3 id="current-exercise">Pushups</h3>
+                        <span class="exercise-category">Chest & Triceps</span>
+                        <div class="exercise-stats">
+                            <div class="stat-box">
+                                <div class="stat-value" id="current-set">1</div>
+                                <div class="stat-label">SET</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="current-rep">12</div>
+                                <div class="stat-label">REPS</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="calories">48</div>
+                                <div class="stat-label">CALORIES</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timer-container">
+                        <div class="label">TIME REMAINING</div>
+                        <div class="timer" id="workout-timer">00:45</div>
+                    </div>
+                    <div class="animation-controls">
+                        <button class="control-btn" id="prev-btn">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button class="control-btn" id="play-btn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="control-btn" id="next-btn">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercise Selection -->
+        <section class="exercise-selection">
+            <div class="section-title">
+                <h2>Exercise Library</h2>
+                <p>Select an exercise to see the 3D demonstration</p>
+            </div>
+            <div class="exercises-grid">
+                <div class="exercise-card active" data-exercise="pushups">
+                    <div class="exercise-img" style="background: linear-gradient(135deg, #4361ee, #3a0ca3);">
+                        <i class="fas fa-person-booth"></i>
+                    </div>
+                    <div class="exercise-content">
+                        <h4>Pushups</h4>
+                        <span class="category">Chest & Triceps</span>
+                        <p>Build upper body strength with proper form pushups.</p>
+                        <div class="difficulty">
+                            <i class="fas fa-circle active"></i>
+                            <i class="fas fa-circle"></i>
+                            <i class="fas fa-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="exercise-card" data-exercise="squats">
+                    <div class="exercise-img" style="background: linear-gradient(135deg, #4cc9f0, #3f37c9);">
+                        <i class="fas fa-walking"></i>
+                    </div>
+                    <div class="exercise-content">
+                        <h4>Squats</h4>
+                        <span class="category">Legs & Glutes</span>
+                        <p>Develop lower body strength with perfect squat form.</p>
+                        <div class="difficulty">
+                            <i class="fas fa-circle active"></i>
+                            <i class="fas fa-circle active"></i>
+                            <i class="fas fa-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="exercise-card" data-exercise="pullups">
+                    <div class="exercise-img" style="background: linear-gradient(135deg, #f72585, #7209b7);">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <div class="exercise-content">
+                        <h4>Pullups</h4>
+                        <span class="category">Back & Biceps</span>
+                        <p>Build a strong back with proper pullup technique.</p>
+                        <div class="difficulty">
+                            <i class="fas fa-circle"></i>
+                            <i class="fas fa-circle"></i>
+                            <i class="fas fa-circle active"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="exercise-card" data-exercise="lunges">
+                    <div class="exercise-img" style="background: linear-gradient(135deg, #2ec4b6, #e71d36);">
+                        <i class="fas fa-shoe-prints"></i>
+                    </div>
+                    <div class="exercise-content">
+                        <h4>Lunges</h4>
+                        <span class="category">Legs & Glutes</span>
+                        <p>Improve balance and leg strength with lunges.</p>
+                        <div class="difficulty">
+                            <i class="fas fa-circle active"></i>
+                            <i class="fas fa-circle"></i>
+                            <i class="fas fa-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section class="pricing">
+            <div class="section-title">
+                <h2>Simple & Affordable Plans</h2>
+                <p>Start with our 60-day free trial, then choose the plan that works for you</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Free Trial</h3>
+                        <div class="price">$0 <span>/ 60 days</span></div>
+                        <p>Perfect for starting your fitness journey</p>
+                    </div>
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Full access to all workouts</li>
+                            <li><i class="fas fa-check"></i> Personalized 120-day plan</li>
+                            <li><i class="fas fa-check"></i> 3D exercise animations</li>
+                            <li><i class="fas fa-check"></i> Progress tracking</li>
+                            <li><i class="fas fa-check"></i> Basic nutrition guidance</li>
+                            <li class="disabled"><i class="fas fa-times"></i> Advanced analytics</li>
+                            <li class="disabled"><i class="fas fa-times"></i> Premium support</li>
+                        </ul>
+                    </div>
+                    <div class="pricing-footer">
+                        <button class="btn btn-outline" style="width: 100%; padding: 1rem; border-color: var(--accent); color: var(--accent);">
+                            Start Free Trial
+                        </button>
+                    </div>
+                </div>
+                <div class="pricing-card popular">
+                    <div class="popular-tag">MOST POPULAR</div>
+                    <div class="pricing-header">
+                        <h3>Lifetime Access</h3>
+                        <div class="price">$100 <span>/ lifetime</span></div>
+                        <p>One-time payment for unlimited access</p>
+                    </div>
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Everything in Free Trial</li>
+                            <li><i class="fas fa-check"></i> Unlimited workout plans</li>
+                            <li><i class="fas fa-check"></i> Advanced analytics</li>
+                            <li><i class="fas fa-check"></i> Premium support</li>
+                            <li><i class="fas fa-check"></i> Custom meal plans</li>
+                            <li><i class="fas fa-check"></i> Video consultations</li>
+                            <li><i class="fas fa-check"></i> Exclusive content</li>
+                        </ul>
+                    </div>
+                    <div class="pricing-footer">
+                        <button class="btn btn-primary" style="width: 100%; padding: 1rem;">
+                            Get Lifetime Access
+                        </button>
+                    </div>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Premium</h3>
+                        <div class="price">$15 <span>/ month</span></div>
+                        <p>For those who prefer monthly access</p>
+                    </div>
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Everything in Free Trial</li>
+                            <li><i class="fas fa-check"></i> Unlimited workout plans</li>
+                            <li><i class="fas fa-check"></i> Advanced analytics</li>
+                            <li><i class="fas fa-check"></i> Priority support</li>
+                            <li><i class="fas fa-check"></i> Custom meal plans</li>
+                            <li><i class="fas fa-check"></i> Monthly check-ins</li>
+                            <li class="disabled"><i class="fas fa-times"></i> Video consultations</li>
+                        </ul>
+                    </div>
+                    <div class="pricing-footer">
+                        <button class="btn btn-outline" style="width: 100%; padding: 1rem; border-color: var(--accent); color: var(--accent);">
+                            Subscribe Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <!-- Workout Plan Section (Auth Only) -->
+    <section id="workouts-section" class="workout-plan auth-only">
+        <div class="section-title">
+            <h2>Your Workout Plan</h2>
+            <p>Follow your personalized 120-day transformation journey</p>
+        </div>
+        <div class="workout-plan-container">
+            <div id="day-counter">Day 1 of 120</div>
+            <div class="progress-container">
+                <div id="workout-progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div id="workout-plan">
+                <!-- Workout plan will be dynamically inserted here -->
+            </div>
+            <div id="calorie-counter-container" style="text-align: center; margin-top: 2rem;">
+                <h3>Total Calories Burned</h3>
+                <div id="calorie-counter" style="font-size: 2.5rem; font-weight: bold; color: var(--accent);">0</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Progress Section (Auth Only) -->
+    <section id="progress-section" class="progress-section auth-only">
+        <div class="section-title">
+            <h2>Your Progress</h2>
+            <p>Track your transformation journey</p>
+        </div>
+        <div id="progress-photos">
+            <!-- Progress photos will be dynamically inserted here -->
+        </div>
+        <div style="text-align: center; margin-top: 2rem;">
+            <input type="file" id="photo-input" accept="image/*" style="display: none;">
+            <button id="upload-photo-btn" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Upload Progress Photo
+            </button>
+        </div>
+    </section>
+
+    <!-- Workout Container (Auth Only) -->
+    <div id="workout-container" class="auth-only">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2 id="workout-day-title">Day 1 Workout</h2>
+                <button id="complete-workout-btn" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Complete Workout
+                </button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div>
+                    <div class="animation-container" style="height: 500px;">
+                        <div id="workout-animation">
+                            <!-- Workout animation will be rendered here -->
+                        </div>
+                        <div class="exercise-info">
+                            <h3 id="workout-current-exercise">Exercise Name</h3>
+                            <span class="exercise-category">Category</span>
+                            <div class="exercise-stats">
+                                <div class="stat-box">
+                                    <div class="stat-value" id="workout-current-set">1</div>
+                                    <div class="stat-label">SET</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value" id="workout-current-rep">12</div>
+                                    <div class="stat-label">REPS</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value" id="workout-calories">48</div>
+                                    <div class="stat-label">CALORIES</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timer-container">
+                            <div class="label">TIME REMAINING</div>
+                            <div class="timer" id="workout-exercise-timer">00:45</div>
+                        </div>
+                        <div class="animation-controls">
+                            <button class="control-btn" id="workout-prev-btn">
+                                <i class="fas fa-step-backward"></i>
+                            </button>
+                            <button class="control-btn" id="workout-play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="control-btn" id="workout-next-btn">
+                                <i class="fas fa-step-forward"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 style="margin-bottom: 1rem;">Workout Summary</h3>
+                    <div id="workout-summary" style="background: rgba(30, 30, 45, 0.7); border-radius: 10px; padding: 1.5rem;">
+                        <!-- Workout summary will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>FitMaster Pro</h3>
+                <p>Your personal fitness companion for transformative 120-day journeys with AI-powered guidance and real-time 3D exercise demonstrations.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#" class="nav-link" data-section="home"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="#" class="nav-link" data-section="workouts"><i class="fas fa-chevron-right"></i> Workouts</a></li>
+                    <li><a href="#" class="nav-link" data-section="progress"><i class="fas fa-chevron-right"></i> Progress Tracker</a></li>
+                    <li><a href="#" class="nav-link" data-section="nutrition"><i class="fas fa-chevron-right"></i> Nutrition Plans</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Workouts</h3>
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Beginner Programs</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Advanced Training</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Arm Workouts</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Leg Workouts</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Core Workouts</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li><a href="#"><i class="fas fa-envelope"></i> support@fitmaster.com</a></li>
+                    <li><a href="#"><i class="fas fa-phone"></i> +1 (555) 123-4567</a></li>
+                    <li><a href="#"><i class="fas fa-map-marker-alt"></i> Fitness Street, Health City</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 FitMaster Pro. All rights reserved. | Privacy Policy | Terms of Service</p>
+        </div>
+    </footer>
+
+    <script src="./script.js"></script>
+</body>
+</html>
